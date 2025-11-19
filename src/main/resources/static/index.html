@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Run: Interactive Text Adventure</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-container">
+    <header id="game-header">
+        <h1>Prompt Run</h1>
+        <div id="game-status">
+            <span id="status-hp">HP: 100</span> |
+            <span id="status-turns">턴: 0</span>
+        </div>
+    </header>
+
+    <div id="story-feed">
+        <div class="message system-message">
+            앞에 신비한 빛이 나오는 동굴을 발견했습니다. '모험 시작' 버튼을 누르세요.
+        </div>
+    </div>
+
+    <div id="input-area">
+        <button id="send-button" onclick="sendMessage()">모험 시작</button>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
