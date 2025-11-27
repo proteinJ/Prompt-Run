@@ -104,8 +104,8 @@ public class GameService {
 
         // 현재 턴이 11턴을 초과하였을 경우
         if (currentTurn > 11) {
-            userMessage = "턴 제한 5회를 초과했습니다. 즉시 [RESULT: TIMEOUT] 키워드를 사용하여 스토리를 종료하고 결말을 묘사하십시오.";
-            log.info("턴 제한 5회 초과 [RESULT: TIMEOUT]");
+            userMessage = "턴 제한 10회를 초과했습니다. 즉시 [RESULT: TIMEOUT] 키워드를 사용하여 스토리를 종료하고 결말을 묘사하십시오.";
+            log.info("턴 제한 10회 초과 [RESULT: TIMEOUT]");
         }
 
 
