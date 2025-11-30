@@ -2,13 +2,16 @@ package com.promptrungame.prompt_run.service;
 
 import com.promptrungame.prompt_run.config.JwtTokenProvider;
 import com.promptrungame.prompt_run.domain.Member;
+import com.promptrungame.prompt_run.domain.RefreshToken;
 import com.promptrungame.prompt_run.dto.MemberLoginResponse;
 import com.promptrungame.prompt_run.repository.MemberRepository;
+import com.promptrungame.prompt_run.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Slf4j
@@ -19,6 +22,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     // 회원가입
     public Member registerMember(Member member) {
@@ -36,20 +40,33 @@ public class MemberService {
 
         if (passwordEncoder.matches(member.getPassword(), foundMember.getPassword())) {
             // Login Success
-            String accessToken = jwtTokenProvider.generateAccessToken(foundMember);
-            if (accessToken == null) {
+            String accessTokenValue = jwtTokenProvider.generateAccessToken(foundMember);
+            String refreshTokenValue = jwtTokenProvider.generateRefreshToken(foundMember);
+
+            Date expiresAt = JwtTokenProvider.generateAccessTokenExpiresIn(7);
+
+            if (accessTokenValue == null) {
                 log.info("accessToken 생성 실패");
                 throw new IllegalArgumentException("accessToken 생성 실패");
             }
             log.info("accessToken 생성 완료");
 
             // refreshToken을 DB에 저장
+            RefreshToken refreshToken = RefreshToken.builder()
+                    .id(foundMember.getId())
+                    .tokenValue(refreshTokenValue)
+                    .memberId(foundMember.getId())
+                    .expiredAt(expiresAt)
+                    .build();
 
+            refreshTokenRepository.save(refreshToken);
+            log.info("refreshToken 저장 완료");
 
             // 반환할 DTO에 정보 저장
             MemberLoginResponse response = MemberLoginResponse.builder()
                     .memberId(foundMember.getId())
-                    .accessToken(accessToken)
+                    .refreshToken(refreshTokenValue)
+                    .accessToken(accessTokenValue)
                     .grantType("Bearer")
                     .build();
 

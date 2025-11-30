@@ -4,10 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Run: Interactive Text Adventure</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="game-container">
+
+<div id="main-screen">
+    <div id="menu-buttons">
+        <button class="option-button" onclick="showScreen('login-screen')">로그인</button>
+        <button class="option-button" onclick="showScreen('signup-screen')">회원가입</button>
+    </div>
+
+    <button id="log-button" class="option-button">게임 로그</button>
+
+    <button id="start-button">Prompt Run</button>
+</div>
+
+
+<div id="game-screen">
     <header id="game-header">
         <h1>Prompt Run</h1>
         <div id="game-status">
@@ -17,15 +33,38 @@
     </header>
 
     <div id="story-feed">
-        <div class="message system-message">
-            뭐지 저 버튼은? 앞에 Prompt Run 세계 라는 버튼이 있다.
-        </div>
     </div>
 
     <div id="input-area">
-        <button id="send-button">Prompt Run</button>
     </div>
+</div>
 
+<div id="login-screen" class="full-screen-overlay">
+    <div class="form-wrapper">
+        <button class="close-button" onclick="showScreen('main-screen')">X</button>
+        <h2>로그인</h2>
+        <form id="login-form">
+            <input type="text" id="login-username" placeholder="아이디" required>
+            <input type="password" id="login-password" placeholder="비밀번호" required>
+            <button type="submit" class="submit-button">로그인</button>
+        </form>
+        <p>계정이 없으신가요? <span class="link-text" onclick="showScreen('signup-screen')">회원가입</span></p>
+    </div>
+</div>
+
+<div id="signup-screen" class="full-screen-overlay">
+    <div class="form-wrapper">
+        <button class="close-button" onclick="showScreen('main-screen')">X</button>
+        <h2>회원가입</h2>
+        <form id="signup-form">
+            <input type="text" id="signup-username" placeholder="아이디" required>
+            <input type="text" id="signup-realname" placeholder="닉네임" required>
+            <input type="password" id="signup-password" placeholder="비밀번호" required>
+            <input type="password" id="signup-confirm-password" placeholder="비밀번호 확인" required>
+            <button type="submit" class="submit-button">회원가입</button>
+        </form>
+        <p>이미 계정이 있으신가요? <span class="link-text" onclick="showScreen('login-screen')">로그인</span></p>
+    </div>
 </div>
 
 <script src="script.js"></script>
