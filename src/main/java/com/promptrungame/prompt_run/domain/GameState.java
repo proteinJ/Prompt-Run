@@ -12,8 +12,6 @@ import java.util.List;
 @Builder
 public class GameState implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
     private String theme;
     private int hp;
     private int currentTurn;

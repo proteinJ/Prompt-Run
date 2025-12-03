@@ -25,7 +25,7 @@ public class MemberService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     // 회원가입
-    public Member registerMember(Member member) {
+    public Member signupMember(Member member) {
         String encodedPassword = passwordEncoder.encode(member.getPassword());
         member.setPassword(encodedPassword);
 

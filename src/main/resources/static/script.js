@@ -1,12 +1,8 @@
-// =====================================
-// script.js (수정)
-// =====================================
-
 // 상태 변수
 let currentTurn = 0;
 let isWaitingForQuizAnswer = false;
 
-// 🔑 메인/게임 화면 전환을 위한 요소 추가
+// 메인/게임 화면 전환을 위한 요소 추가
 const getUI = () => ({
     mainScreen: document.getElementById('main-screen'),
     gameScreen: document.getElementById('game-screen'),
@@ -56,12 +52,12 @@ function updateGameStatus(hp, turn) {
     if(ui.statusTurn) ui.statusTurn.textContent = `턴: ${turn}`;
 }
 
-// 🔑 옵션 렌더링 로직 (선택지는 질문 바로 아래에 현재거만 보이게)
+// 옵션 렌더링 로직 (선택지는 질문 바로 아래에 현재거만 보이게)
 function renderOptions(responseText) {
     const ui = getUI();
     if(!ui.inputArea) return;
 
-    // 🔑 기존 내용 비우기 (누적되지 않도록)
+    // 기존 내용 비우기 (누적되지 않도록)
     ui.inputArea.innerHTML = '';
     const optionsMatch = responseText.match(/\[OPTIONS:\s*([\s\S]*?)\]/);
 
@@ -94,7 +90,7 @@ function submitQuizAnswer(answer) {
     sendMessage(taggedAnswer);
 }
 
-// 🔑 퀴즈 입력 렌더링 로직 (선택지는 질문 바로 아래에 현재거만 보이게)
+// 퀴즈 입력 렌더링 로직 (선택지는 질문 바로 아래에 현재거만 보이게)
 function renderQuizInput(quizData) {
     const ui = getUI();
     if (!ui.inputArea) {
@@ -102,7 +98,7 @@ function renderQuizInput(quizData) {
         return;
     }
 
-    // 🔑 기존 내용 비우기 (누적되지 않도록)
+    // 기존 내용 비우기 (누적 X)
     ui.inputArea.innerHTML = '';
 
     console.log("--- [DEBUG] 퀴즈 데이터 렌더링 시작 ---", quizData);
@@ -139,9 +135,9 @@ function renderQuizInput(quizData) {
 // 2. 메인 로직
 // #####################################
 
-// 🔑 화면 전환 로직 추가
+// 화면 전환 로직 추가
 
-// 🔑 메인/로그인/회원가입 화면 전환을 위한 함수 추가
+// 메인/로그인/회원가입 화면 전환을 위한 함수 추가
 function showScreen(screenId) {
     const screens = ['main-screen', 'game-screen', 'login-screen', 'signup-screen'];
 
@@ -162,7 +158,7 @@ function showScreen(screenId) {
 function startGame() {
     showScreen('game-screen'); // 게임 화면 표시
 
-    // 게임 시작 메시지 전송 (기존 로직 유지)
+    // 게임 시작 메시지 전송
     sendMessage("게임 시작. 시나리오를 시작해 주세요.");
 }
 
@@ -173,7 +169,7 @@ async function sendMessage(message = "게임 시작. 시나리오를 시작해 �
     if (message === "게임 시작. 시나리오를 시작해 주세요.") {
         currentTurn = 1;
         updateGameStatus(100, currentTurn);
-        // 🔑 startGame()에서 이미 버튼이 제거되었으므로 여기서는 제거 로직 생략
+        // startGame()에서 이미 버튼이 제거되었으므로 여기서는 제거 로직 생략
     }
 
     if (!message.startsWith("[QUIZ_ANSWER]:")) {
@@ -212,7 +208,18 @@ async function sendMessage(message = "게임 시작. 시나리오를 시작해 �
         }
 
         if (data.gameEnded) {
-            addMessageToFeed("✅ 게임 종료!", 'system');
+            const resultMatch = data.rawResponse.match(/\[RESULT:\s*([\s\S]*?)\]/);
+
+            let resultMessage = "✅ 게임 종료!"; // [RESULT: ] 태그가 없을 경우의 기본 메시지
+
+            if (resultMatch) {
+                // 태그 내용이 있다면 해당 내용을 최종 결과 메시지로 사용
+                resultMessage = resultMatch[1].trim();
+            }
+
+            // 최종 결과 메시지를 피드에 추가
+            addMessageToFeed(resultMessage, 'system');
+
             if(ui.inputArea) ui.inputArea.innerHTML = '<button class="option-button" onclick="window.location.reload()">새 게임 시작</button>';
         } else {
             renderOptions(data.rawResponse);
@@ -251,7 +258,7 @@ async function login(username, password) {
 
         const data = await response.json();
 
-        if (data.accessToken) { // 🔑 성공 시 처리
+        if (data.accessToken) { // 성공 시 처리
 
 
             localStorage.setItem('accessToken', data.accessToken);
@@ -262,7 +269,7 @@ async function login(username, password) {
 
             console.log("로그인 응답 데이터:", data);
 
-        } else { // 🔑 실패 시 처리 (HTTP 200 OK지만 success: false이거나 HTTP 오류 코드)
+        } else { // 실패 시 처리 (HTTP 200 OK지만 success: false이거나 HTTP 오류 코드)
             const errorMessage = data.message || "로그인은 성공했지만 토큰을 받지 못했습니다. 서버 설정을 확인하세요.";
             alert("로그인은 성공했지만 토큰을 받지 못했습니다. 서버 설정을 확인하세요.");
         }
@@ -292,15 +299,15 @@ function logout() {
 document.addEventListener('DOMContentLoaded', () => {
     const startButton = document.getElementById('start-button');
     if (startButton) {
-        startButton.onclick = startGame; // 🔑 버튼 클릭 시 startGame 호출
+        startButton.onclick = startGame; // 버튼 클릭 시 startGame 호출
     }
 
     const token = getAccessToken();
     updateAuthStatus(!!token);
-    // 🔑 초기 화면은 main-screen만 보이게 설정
+    // 초기 화면은 main-screen만 보이게 설정
     showScreen('main-screen');
 
-    // 🔑 폼 제출 이벤트 리스너 추가 (실제 백엔드 통신은 여기서 구현)
+    // 폼 제출 이벤트 리스너 추가 (실제 백엔드 통신은 여기서 구현)
     document.getElementById('login-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         console.log("로그인 시도");
@@ -319,7 +326,49 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('signup-form')?.addEventListener('submit', (e) => {
         e.preventDefault();
         console.log("회원가입 시도");
-        alert("회원가입 기능 구현 예정");
-        // 실제 회원가입 API 호출 로직 구현...
+
+        const username = document.getElementById('signup-username').value;
+        const password = document.getElementById('signup-password').value;
+        const nickname = document.getElementById('signup-nickname').value;
+
+        // **오류 수정:** signupData 객체의 중괄호 { } 를 닫았습니다.
+        const signupData = {
+            username: username,
+            password: password,
+            nickname: nickname
+        };
+
+        // role이나 membership은 백엔드에서 기본값으로 설정.
+
+        fetch('http://localhost:8080/api/member/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(signupData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    // 성공 시 (HTTP 상태코드 200번대)
+                    alert("회원가입이 완료되었습니다! 로그인 화면으로 이동합니다.");
+                    showScreen('login-screen'); // 로그인 페이지로 이동하는 대신, 화면 전환 함수 사용
+                } else {
+                    return response.text().then(text => {
+                        // JSON 형태로 에러가 오는 경우를 대비하여 파싱 시도
+                        try {
+                            const errorJson = JSON.parse(text);
+                            throw new Error(errorJson.message || text);
+                        } catch (e) {
+                            throw new Error(text);
+                        }
+                    });
+                }
+            })
+            .catch(error => {
+                // 에러 처리
+                console.error('Error:', error);
+                // 백엔드에서 받은 에러 메시지(예: "이미 존재하는 아이디입니다.")를 표시
+                alert("회원가입 실패: " + error.message);
+            });
     });
 });
