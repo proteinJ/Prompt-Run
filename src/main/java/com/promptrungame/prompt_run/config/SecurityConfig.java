@@ -60,6 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 회원가입 및 모든 게임 API 경로를 인증 없이 허용 (Whitelist)
                         .requestMatchers("/", "/index.html", "/style.css", "/script.js", "/js/**", "/css/**", "/favicon.ico", "/api/member/**", "/api/game/**").permitAll()
+                        .requestMatchers("/image/**", "/mainBG.jpg").permitAll()
                         // 나머지 모든 요청은 인증을 요구합니다.
                         .anyRequest().authenticated()
                 )

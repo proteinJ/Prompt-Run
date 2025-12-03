@@ -4,51 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompt Run: Interactive Text Adventure</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Gowun+Dodum&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="main-logo">
+
+</div>
 
 <div id="main-screen">
     <div id="menu-buttons">
-        <button class="option-button" onclick="showScreen('login-screen')">로그인</button>
-        <button class="option-button" onclick="showScreen('signup-screen')">회원가입</button>
+        <button onclick="showScreen('login-screen')">로그인</button>
+        <button onclick="showScreen('signup-screen')">회원가입</button>
     </div>
 
-    <button id="log-button" class="option-button">게임 로그</button>
+    <button id="start-button">Prompt Run 시작하기</button>
 
-    <button id="start-button">Prompt Run</button>
+    <button id="log-button">게임 로그</button>
 </div>
 
 
 <div id="game-screen">
-    <header id="game-header">
-        <h1>Prompt Run</h1>
-        <div id="game-status">
-            <span id="status-hp">HP: 100</span> |
-            <span id="status-turns">턴: 0</span>
+    <div id="game-content-wrapper">
+        <header id="game-header">
+            <h1>Prompt Run</h1>
+            <div id="game-status">
+                <span id="status-hp">HP 100</span>
+                <span style="margin: 0 8px; opacity: 0.3;">|</span>
+                <span id="status-turns">Turn 0</span>
+            </div>
+        </header>
+
+        <div id="story-feed">
         </div>
-    </header>
 
-    <div id="story-feed">
-    </div>
-
-    <div id="input-area">
+        <div id="input-area">
+        </div>
     </div>
 </div>
 
 <div id="login-screen" class="full-screen-overlay">
     <div class="form-wrapper">
-        <button class="close-button" onclick="showScreen('main-screen')">X</button>
+        <button class="close-button" onclick="showScreen('main-screen')">✕</button>
         <h2>로그인</h2>
         <form id="login-form">
             <label for="login-username">아이디</label>
-            <input type="text" id="login-username" placeholder="아이디" required>
+            <input type="text" id="login-username" placeholder="아이디를 입력해주세요" required>
+
             <label for="login-password">비밀번호</label>
-            <input type="password" id="login-password" placeholder="비밀번호" required>
-            <button type="submit" class="submit-button">로그인</button>
+            <input type="password" id="login-password" placeholder="비밀번호를 입력해주세요" required>
+
+            <button type="submit" class="submit-button">로그인하기</button>
         </form>
         <p>계정이 없으신가요? <span class="link-text" onclick="showScreen('signup-screen')">회원가입</span></p>
     </div>
@@ -56,18 +61,22 @@
 
 <div id="signup-screen" class="full-screen-overlay">
     <div class="form-wrapper">
-        <button class="close-button" onclick="showScreen('main-screen')">X</button>
+        <button class="close-button" onclick="showScreen('main-screen')">✕</button>
         <h2>회원가입</h2>
         <form id="signup-form">
             <label for="signup-nickname">닉네임</label>
             <input type="text" id="signup-nickname" placeholder="닉네임" required>
+
             <label for="signup-username">아이디</label>
             <input type="text" id="signup-username" placeholder="아이디" required>
+
             <label for="signup-password">비밀번호</label>
             <input type="password" id="signup-password" placeholder="비밀번호" required>
+
             <label for="signup-confirm-password">비밀번호 확인</label>
             <input type="password" id="signup-confirm-password" placeholder="비밀번호 확인" required>
-            <button type="submit" class="submit-button">회원가입</button>
+
+            <button type="submit" class="submit-button">가입하기</button>
         </form>
         <p>이미 계정이 있으신가요? <span class="link-text" onclick="showScreen('login-screen')">로그인</span></p>
     </div>
