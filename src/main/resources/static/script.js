@@ -13,6 +13,10 @@ const getUI = () => ({
     sendBtn: document.getElementById('start-button') // ID 변경
 });
 
+// Helper to get the log list container
+const getLogContainer = () => document.getElementById('log-list-container');
+
+
 //#####################################
 // 1. 렌더링 및 UI 함수
 //#####################################
@@ -130,16 +134,107 @@ function renderQuizInput(quizData) {
     ui.inputArea.appendChild(choicesContainer);
 }
 
+// 게임 기록 목록을 렌더링하는 함수
+function renderGameLogsList(logs) {
+    const logContainer = getLogContainer();
+    logContainer.innerHTML = ''; // Clear loading status
+
+    if (logs.length === 0) {
+        logContainer.innerHTML = '<p style="color: var(--text-gray); text-align: center; margin-top: 50px;">저장된 게임 기록이 없습니다.</p>';
+        return;
+    }
+
+    const list = document.createElement('div');
+    list.classList.add('log-list');
+    list.style.display = 'flex';
+    list.style.flexDirection = 'column';
+    list.style.gap = '15px';
+
+    logs.forEach(log => {
+        const logItem = document.createElement('div');
+        logItem.classList.add('log-item');
+        logItem.style.padding = '15px';
+        logItem.style.borderRadius = '12px';
+        logItem.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+        logItem.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+        logItem.style.cursor = 'pointer';
+        logItem.style.transition = '0.2s';
+        logItem.onmouseover = () => logItem.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        logItem.onmouseout = () => logItem.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+
+        // Format time
+        const playedAt = new Date(log.playedAt).toLocaleString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        // Determine status color
+        let statusColor = '#B0B8C1'; // gray
+        let statusText = 'TIMEOUT';
+
+        if (log.endResult === 'VICTORY') {
+            statusColor = '#4CAF50'; // green
+            statusText = 'VICTORY';
+        } else if (log.endResult === 'DEATH') {
+            statusColor = '#F44336'; // red
+            statusText = 'DEATH';
+        } else if (log.endResult === 'TIMEOUT') {
+            statusColor = '#FF9800'; // orange
+            statusText = 'TIMEOUT';
+        } else {
+            statusText = log.endResult || '알 수 없음';
+        }
+
+        // Render content
+        logItem.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-weight: 700; font-size: 1.1rem; color: ${log.isSuccess ? '#4CAF50' : '#F44336'};">
+                    ${log.isSuccess ? '⭐ 성공' : '💀 실패'}
+                </span>
+                <span style="font-size: 0.9rem; color: ${statusColor}; font-weight: 600;">
+                    결과: ${statusText}
+                </span>
+            </div>
+            <div style="font-size: 0.95rem; color: var(--text-gray);">
+                <p style="margin: 0; padding: 2px 0;">테마: ${log.promptUsed}</p>
+                <p style="margin: 0; padding: 2px 0;">턴 수: ${log.attemptCount}회</p>
+                <p style="margin: 0; padding: 2px 0;">일시: ${playedAt}</p>
+            </div>
+        `;
+
+        // 상세 로그 보기 (간단한 alert)
+        logItem.onclick = () => showLogDetail(log);
+
+        list.appendChild(logItem);
+    });
+
+    logContainer.appendChild(list);
+}
+
+function showLogDetail(log) {
+    // 대화 기록을 깔끔하게 보여주기 위해 줄바꿈 문자를 처리합니다.
+    const conversation = log.fullConversationHistory ?
+        log.fullConversationHistory.replace(/\n\n--- TURN SEPARATOR ---\n\n/g, '\n\n---\n') :
+        '기록 없음';
+
+    alert(
+        `[게임 기록 상세] \n\n` +
+        `결과: ${log.endResult}\n` +
+        `최종 HP: ${log.finalHp}\n` +
+        `턴 수: ${log.attemptCount}\n` +
+        `플레이 일시: ${new Date(log.playedAt).toLocaleString('ko-KR')}\n\n` +
+        `--- 전체 대화 기록 ---\n` +
+        conversation
+    );
+}
 
 // #####################################
 // 2. 메인 로직
 // #####################################
 
-// 화면 전환 로직 추가
-
-// 메인/로그인/회원가입 화면 전환을 위한 함수 추가
+// 화면 전환 로직 수정 (log-screen 추가)
 function showScreen(screenId) {
-    const screens = ['main-screen', 'game-screen', 'login-screen', 'signup-screen'];
+    const screens = ['main-screen', 'game-screen', 'login-screen', 'signup-screen', 'log-screen'];
 
     screens.forEach(id => {
         const screen = document.getElementById(id);
@@ -160,6 +255,49 @@ function startGame() {
 
     // 게임 시작 메시지 전송
     sendMessage("게임 시작. 시나리오를 시작해 주세요.");
+}
+
+// 🚀 신규 추가: 게임 로그 조회 함수
+async function showGameLogs() {
+    if (!getAccessToken()) {
+        alert("로그인 후 게임 기록을 조회할 수 있습니다.");
+        showScreen('login-screen');
+        return;
+    }
+
+    showScreen('log-screen');
+    const logContainer = getLogContainer();
+    logContainer.innerHTML = '<p id="log-loading-status" style="color: var(--text-gray); text-align: center; margin-top: 50px;">기록을 불러오는 중...</p>';
+
+    try {
+        const token = getAccessToken();
+        const response = await fetch('http://localhost:8080/api/logs', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                // 서버가 JWT를 통해 인증하고 세션을 바인딩한다고 가정합니다.
+                'Authorization': `Bearer ${token}`
+            },
+        });
+
+        if (response.status === 401) {
+            alert("인증이 만료되었거나 권한이 없습니다. 다시 로그인해주세요.");
+            logout();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const logs = await response.json();
+
+        renderGameLogsList(logs);
+
+    } catch (error) {
+        console.error('로그 조회 통신 오류:', error);
+        logContainer.innerHTML = '<p style="color: red; text-align: center; margin-top: 50px;">기록을 불러오는 데 실패했습니다.</p>';
+    }
 }
 
 

@@ -23,14 +23,14 @@ public class GameRecord {
     private Member member;
 
     // 게임 관련 데이터
-    private int score;
+    private int hp;
     private String promptUsed;
     private int attemptCount;
     private boolean isSuccess;
     private String endResult;
     private LocalDateTime playedAt;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String conversationHistory;
 
 }

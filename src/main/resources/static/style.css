@@ -39,8 +39,8 @@ body {
     align-items: center;
     min-height: 100vh;
     /* 배경 유지 */
-    /*background-image: url('https://preview.redd.it/44ac9bm5jif71.png?width=1080&crop=smart&auto=webp&s=8cd5e6a3aacb5dd543b38114741d37f09693577b');*/
-    background-image: url('image/mainBG.jpg');
+    background-image: url('https://preview.redd.it/44ac9bm5jif71.png?width=1080&crop=smart&auto=webp&s=8cd5e6a3aacb5dd543b38114741d37f09693577b');
+    /* background-image: url('image/mainBG.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;

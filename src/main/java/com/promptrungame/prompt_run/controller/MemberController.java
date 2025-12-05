@@ -7,8 +7,10 @@ import com.promptrungame.prompt_run.repository.MemberRepository;
 import com.promptrungame.prompt_run.service.MemberService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/member")
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
@@ -30,6 +33,7 @@ public class MemberController {
 
         // 1. 중복 체크
         if (memberRepository.existsByUsername(requestDto.getUsername())) {
+            log.warn("❌ 이미 존재하는 아이디");
             return ResponseEntity.badRequest().body("이미 존재하는 아이디입니다.");
         }
 
@@ -50,13 +54,21 @@ public class MemberController {
         // 3. 서비스 호출 (비밀번호 인코딩 및 DB 저장)
         memberService.signupMember(member);
 
+        log.info("✅ 회원가입 성공 username: " + member.getUsername());
         return ResponseEntity.ok("회원가입 성공");
     }
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<MemberLoginResponse> loginMember(@RequestBody Member member, HttpServletResponse response) {
+    public ResponseEntity<MemberLoginResponse> loginMember(@RequestBody Member member, HttpServletResponse response, HttpSession session) {
         MemberLoginResponse tokenResponse = memberService.loginMember(member);
+
+        Long memberId = tokenResponse.getMemberId();
+
+        if (memberId != null) {
+            session.setAttribute("memberId", memberId);
+            log.info("✅ 로그인 성공 username: " + memberId);
+        }
 
         // refreshToken을 HTTP-Only Cookie에 저장
         Cookie refreshTokenCookie = new Cookie("refreshToken", tokenResponse.getRefreshToken());

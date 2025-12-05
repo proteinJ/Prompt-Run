@@ -8,6 +8,7 @@ import com.google.genai.types.Part;
 import com.promptrungame.prompt_run.domain.GameState;
 import com.promptrungame.prompt_run.domain.Quiz;
 import com.promptrungame.prompt_run.dto.ChatResponse;
+import com.promptrungame.prompt_run.dto.GameRecordRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class GameService {
 
     private final Client geminiClient;
     private final QuizService quizService;
+    private final GameRecordService gameRecordService;
 
     @Value("${gemini.api.model:gemini-2.5-flash}")
     private String modelName;
@@ -52,13 +54,15 @@ public class GameService {
             "6. **퀴즈 실행 턴 (Turn N+1) 포맷:** 시스템 명령으로 **퀴즈 문제 제시**를 요청받은 경우, **절대로 [OPTIONS: ...] 태그를 포함하지 않고** 퀴즈에 맞는 상황 묘사만 한다." +
             "7. [최종 경고] 모든 턴은 위 A, B, C 유형 중 하나로 종결되어야 한다. 이 외의 포맷은 금지한다.";
 
-    public GameService(Client geminiClient, QuizService quizService) {
+    public GameService(Client geminiClient, QuizService quizService, GameRecordService gameRecordService) {
         this.geminiClient = geminiClient;
         this.quizService = quizService;
+        this.gameRecordService = gameRecordService;
     }
 
     private static final String GAME_STATE_SESSION_KEY = "PromptRunState";
     private static final String QUIZ_SESSION_KEY = "PromptRunQuiz";
+    private static final String MEMBER_ID_SESSION_KEY = "memberId";
 
     public ChatResponse getResponseFromGemini(String userMessage, HttpSession session) {
 
@@ -203,8 +207,44 @@ public class GameService {
 
             // 게임 종료가 되었다면 Session 초기화
             if (isGameEnded) {
+                Long memberId = (Long) session.getAttribute(MEMBER_ID_SESSION_KEY);
+
+                String endResultTag = "";
+
+                if (responseText.contains("[RESULT: VICTORY]")) {
+                    endResultTag = "VICTORY";
+                } else if (responseText.contains("[RESULT: DEATH]")) {
+                    endResultTag = "DEATH";
+                } else if (responseText.contains("[RESULT: TIMEOUT]")) {
+                    endResultTag = "TIMEOUT";
+                }
+
+                if (memberId == null) {
+                    log.warn("🚨 세션에서 Member ID를 찾을 수 없어 게임 기록을 저장하지 않습니다.");
+                } else {
+                    String fullHistory = String.join(
+                            "\n\n--- TURN SEPARATOR ---\n\n",
+                            state.getHistory()
+                    );
+
+                    GameRecordRequest finalRecord = GameRecordRequest.builder()
+                            .hp(state.getHp())
+                            .promptUsed(state.getTheme())
+                            .attemptCount(state.getCurrentTurn()-1)
+                            .isSuccess(responseText.contains("[RESULT: VICTORY]"))
+                            .end_result(endResultTag)
+                            .playedAt(state.getStartedAt().toLocalDateTime())
+                            .fullConversationHistory(fullHistory)
+                            .build();
+
+                    gameRecordService.saveGameRecord(memberId, finalRecord);
+                    log.info("✅ 게임 기록 저장 성공");
+                }
+
                 session.removeAttribute(GAME_STATE_SESSION_KEY);
-                log.info("session 이전 정보 초기화 성공");
+                log.info("✅ session 이전 정보 초기화 성공");
+                session.removeAttribute(QUIZ_SESSION_KEY);
+                log.info("✅ 게임 상태 및 퀴즈 세션 정보 초기화 성공");
             } else {
                 session.setAttribute(GAME_STATE_SESSION_KEY, state);
                 log.info("session에 이전 정보 저장 성공");

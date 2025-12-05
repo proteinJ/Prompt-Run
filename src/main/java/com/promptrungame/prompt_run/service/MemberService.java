@@ -70,7 +70,7 @@ public class MemberService {
                     .grantType("Bearer")
                     .build();
 
-            log.info("로그인 성공");
+            log.info("MemberService Login 로직 완료");
             return response;
         } else {
             // Login Fail
