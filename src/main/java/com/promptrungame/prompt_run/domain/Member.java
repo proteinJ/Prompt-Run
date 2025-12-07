@@ -25,4 +25,7 @@ public class Member {
     private boolean isDeleted;
     private String membership;
     private String role;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 }

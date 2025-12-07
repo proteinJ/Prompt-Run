@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -49,7 +48,7 @@ public class GameService {
 
             "\n\n=== 💡 세부 규칙 ===\n" +
             "3. 메모리 반영: 플레이어의 모든 이전 상태(HP/장비 등)를 반드시 기억하고 시나리오에 반영한다." +
-            "4. 난이도/위험 배분: 턴 1~5는 탐색, 턴 6~10는 교전/도전으로 난이도를 상승시킨다." +
+//            "4. 난이도/위험 배분: 턴 1~5는 탐색, 턴 6~10는 교전/도전으로 난이도를 상승시킨다." +
             "5. 퀴즈 정답 처리: 플레이어의 답변에 대해 [QUIZ_SUCCESS] 또는 [QUIZ_FAIL] 태그를 받으면, 그 결과를 시나리오에 반영한다. [QUIZ_FAIL]일 경우 HP 감소를 명시하고 부정적인 다음 상황으로 연결한다." +
             "6. **퀴즈 실행 턴 (Turn N+1) 포맷:** 시스템 명령으로 **퀴즈 문제 제시**를 요청받은 경우, **절대로 [OPTIONS: ...] 태그를 포함하지 않고** 퀴즈에 맞는 상황 묘사만 한다." +
             "7. [최종 경고] 모든 턴은 위 A, B, C 유형 중 하나로 종결되어야 한다. 이 외의 포맷은 금지한다.";
@@ -107,9 +106,9 @@ public class GameService {
         int currentTurn = state.getCurrentTurn();
 
         // 현재 턴이 11턴을 초과하였을 경우
-        if (currentTurn > 11) {
-            userMessage = "턴 제한 10회를 초과했습니다. 즉시 [RESULT: TIMEOUT] 키워드를 사용하여 스토리를 종료하고 결말을 묘사하십시오.";
-            log.info("턴 제한 10회 초과 [RESULT: TIMEOUT]");
+        if (currentTurn > 3) {
+            userMessage = "턴 제한 3회를 초과했습니다. 즉시 [RESULT: TIMEOUT] 키워드를 사용하여 스토리를 종료하고 결말을 묘사하십시오.";
+            log.info("턴 제한 3회 초과 [RESULT: TIMEOUT]");
         }
 
 
@@ -168,7 +167,7 @@ public class GameService {
                     responseText.contains("[RESULT: DEATH]") ||
                     responseText.contains("[RESULT: TIMEOUT]");
 
-            log.warn("--- 태그 인식 상태 ---");
+            log.warn("--- TURN: {?} 태그 인식 상태 ---", currentTurn);
             log.warn("REQ_QUIZ (AI): {}", requestQuiz); // [QUIZ_REQUEST]가 감지되었는가?
             log.warn("IS_OPTION: {}", isOptionTag);     // [OPTIONS: ]가 감지되었는가?
             log.warn("IS_ENDED: {}", isGameEnded);       // [RESULT: ]가 감지되었는가?
@@ -251,7 +250,7 @@ public class GameService {
             }
 
 
-            ChatResponse dto = ChatResponse.builder()
+            return ChatResponse.builder()
 //                    .response(responseText.replaceAll("\\[QUIZ_REQUEST\\]", "").replaceAll("\\[RESULT:[^\\]]*\\]", "").trim())
                     .response(responseText.replaceAll("\\[QUIZ_REQUEST\\]", "").replaceAll("\\[OPTIONS:\\s*[\\s\\S]*?\\]", "").trim())
                     .rawResponse(responseText)
@@ -260,12 +259,14 @@ public class GameService {
                     .isGameEnded(isGameEnded)
                     .build();
 
-            return dto;
-
 
         // 예외처리
         } catch (Exception e) {
             log.error("Gemini API 호출 중 오류 발생: {} ", e.getMessage(), e);
+
+            state.setCurrentTurn(currentTurn - 1);
+            state.setLastUpdatedAt(java.time.OffsetDateTime.now());
+
             return ChatResponse.builder()
                     .error("현재 AI 서버와 통신할 수 없습니다.")
                     .isQuizRequest(false)

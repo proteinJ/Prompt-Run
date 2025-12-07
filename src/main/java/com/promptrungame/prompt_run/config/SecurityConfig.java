@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,8 +60,7 @@ public class SecurityConfig {
                 // HTTP 요청 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 회원가입 및 모든 게임 API 경로를 인증 없이 허용 (Whitelist)
-                        .requestMatchers("/", "/index.html", "/style.css", "/script.js", "/js/**", "/css/**", "/favicon.ico", "/api/member/**", "/api/game/**").permitAll()
-                        .requestMatchers("/image/**", "/mainBG.jpg").permitAll()
+                        .requestMatchers("/","/index.html","/style.css","/script.js","/image/**","/api/member/signup","/api/member/login", "/mainBG.jpg").permitAll()
                         // 나머지 모든 요청은 인증을 요구합니다.
                         .anyRequest().authenticated()
                 )
@@ -69,10 +69,22 @@ public class SecurityConfig {
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
-
         // 기본 인증 방식을 사용하지 않도록 설정
         // http.httpBasic(httpBasic -> httpBasic.disable());
 
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                // 🎯 필터 체인에서 완전히 제외: 403 Forbidden 오류 방지
+                .requestMatchers(
+                        "/images/**",
+                        "/favicon.ico",
+                        "/style.css",
+                        "/script.js",
+                        "/mainBG.jpg"
+                );
     }
 }

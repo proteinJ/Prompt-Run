@@ -3,12 +3,12 @@ package com.promptrungame.prompt_run.controller;
 import com.promptrungame.prompt_run.domain.GameRecord;
 import com.promptrungame.prompt_run.dto.GameLogResponse;
 import com.promptrungame.prompt_run.service.GameRecordService;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,22 +23,29 @@ import java.util.stream.Collectors;
 public class GameRecordController {
 
     private final GameRecordService gameRecordService;
-    private static final String MEMBER_ID_SESSION_KEY = "memberId";
+//    private static final String MEMBER_ID_SESSION_KEY = "memberId";
 
     @GetMapping
-    public ResponseEntity<List<GameLogResponse>> getMyGameLog(HttpSession session) {
-        Long memberId = (Long) session.getAttribute(MEMBER_ID_SESSION_KEY);
+    public ResponseEntity<?> getMyGameLog(@AuthenticationPrincipal UserDetails userDetails) {
 
-        List<GameRecord> gameRecords = gameRecordService.getMyGameRecords(memberId);
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
 
-        List<GameLogResponse> responseList = gameRecords.stream()
-                // GameRecordService.getMyGameRecords가 Member 엔티티를 FETCH JOIN하지 않으면 N+1 문제가 발생할 수 있습니다.
-                // 쿼리 최적화는 추후 고려하고, 일단 변환합니다.
-                .map(GameLogResponse::from)
-                .collect(Collectors.toList());
+        Long memberId = Long.parseLong(userDetails.getUsername());
 
-        return ResponseEntity.ok(responseList);
+        try {
+            List<GameRecord> gameRecords = gameRecordService.getMyGameRecords(memberId);
+
+            List<GameLogResponse> responseList = gameRecords.stream()
+                    .map(GameLogResponse::from)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(responseList);
+
+        } catch (NumberFormatException e) {
+            log.error("토큰 ID 파싱 에러", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 인증 정보입니다.");
+        }
     }
-
-
 }

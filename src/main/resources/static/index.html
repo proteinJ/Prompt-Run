@@ -7,10 +7,55 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="main-logo">
-
+<!--메인 로고-->
+<div id="main-logo" onclick="showScreen('main-screen')">
+    <img src="image/Prompt_Run_Logo.png" alt="Prompt Run Logo" id="header-logo-img">
 </div>
 
+<!--게임 정보 아이콘-->
+<div id="information-icon" onclick="showScreen('information-screen')">
+    <img src="image/information_icon.png" alt="Prompt Run Information" id="footer-informaion-icon">
+</div>
+
+<!--게임 정보 화면-->
+<div id="information-screen" class="full-screen-overlay">
+    <div class="form-wrapper info-modal-wrapper">
+        <button class="close-button" onclick="showScreen('main-screen')">✕</button>
+
+        <div class="info-header-container">
+            <div class="info-title-badge">
+                <h2 class="info-title-text">게임 정보</h2>
+            </div>
+        </div>
+
+        <div id="information-content" class="info-content-scroll">
+
+            <p class="info-section-title">[게임 개요]</p>
+            <p>
+                'Prompt Run'은 AI 게임 마스터(GM)가 진행하는 텍스트 어드벤처 게임입니다.
+                플레이어는 도둑이 되어 10턴 이내에 고가품을 확보하고 탈출해야 합니다.
+            </p>
+
+            <p class="info-section-title">[핵심 규칙]</p>
+            <ul class="info-rules-list">
+                <li>**턴 제한:** 총 10턴 이내에 목표를 달성해야 합니다. (11턴 초과 시 TIMEOUT)</li>
+                <li>**HP:** 초기 HP는 100입니다. 퀴즈 실패, 위험 행동 등으로 HP가 감소하며, 0이 되면 DEATH로 게임이 종료됩니다.</li>
+                <li>**퀴즈:** 중요한 순간에 보안 시스템 해제 등을 위해 객관식 퀴즈가 출제됩니다.</li>
+            </ul>
+
+            <p class="info-section-title">JaeHyun Park</p>
+            <p>
+                Coding, design, art
+            </p>
+
+            <p class="info-footer-text">
+                Developed with Spring Boot & Gemini API
+            </p>
+        </div>
+    </div>
+</div>
+
+<!--메인 화면-->
 <div id="main-screen">
     <div id="menu-buttons">
         <button onclick="showScreen('login-screen')">로그인</button>
@@ -22,7 +67,7 @@
     <button id="log-button" onclick="showGameLogs()">게임 로그</button>
 </div>
 
-
+<!--게임 스크린-->
 <div id="game-screen">
     <div id="game-content-wrapper">
         <header id="game-header">
@@ -42,6 +87,7 @@
     </div>
 </div>
 
+<!--로그인-->
 <div id="login-screen" class="full-screen-overlay">
     <div class="form-wrapper">
         <button class="close-button" onclick="showScreen('main-screen')">✕</button>
@@ -59,6 +105,7 @@
     </div>
 </div>
 
+<!--회원가입-->
 <div id="signup-screen" class="full-screen-overlay">
     <div class="form-wrapper">
         <button class="close-button" onclick="showScreen('main-screen')">✕</button>
@@ -81,6 +128,76 @@
         <p>이미 계정이 있으신가요? <span class="link-text" onclick="showScreen('login-screen')">로그인</span></p>
     </div>
 </div>
+
+<!--로그 기록-->
+<div id="log-screen" class="full-screen-overlay">
+    <div class="form-wrapper log-modal-wrapper">
+        <button class="close-button" onclick="showScreen('main-screen')">✕</button>
+        <h2>나의 게임 기록</h2>
+        <div id="log-list-container">
+            <p id="log-loading-status">로그인 후 기록을 조회할 수 있습니다.</p>
+        </div>
+    </div>
+</div>
+
+<!--마이페이지-->
+<div id="mypage-screen" class="full-screen-overlay">
+    <div class="form-wrapper mypage-wrapper">
+        <button class="close-button" onclick="showScreen('main-screen')">✕</button>
+        <h2>내 프로필</h2>
+
+        <div class="profile-container">
+
+            <div class="profile-header">
+
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        <span id="profile-avatar-initial">U</span>
+                        <img id="profile-image-display" src="" alt="프로필 이미지" style="display: none;">
+                    </div>
+
+                    <form id="profile-image-form" style="margin-top: 10px;">
+                        <label for="image-upload-input" class="upload-label">
+                            이미지 변경
+                        </label>
+                        <input type="file" id="image-upload-input" name="profileImage" accept="image/*" style="display: none;">
+                    </form>
+                </div>
+
+                <h3 id="profile-nickname-display">로딩중...</h3>
+                <span id="profile-role-badge" class="role-badge">USER</span>
+            </div>
+
+            <div class="profile-details-list">
+                <div class="profile-item">
+                    <span class="label">아이디</span>
+                    <span class="value" id="profile-username"></span>
+                </div>
+                <div class="profile-item">
+                    <span class="label">멤버십 등급</span>
+                    <span class="value" id="profile-membership"></span>
+                </div>
+                <div class="profile-item">
+                    <span class="label">가입일</span>
+                    <span class="value" id="profile-created-at"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--요금제-->
+<div id="membership-screen" class="screen" style="display: none;">
+    <h2>멤버십 변경</h2>
+    <p>원하시는 요금제를 선택해 주세요.</p>
+
+    <div id="membership-list-container" class="options-container"></div>
+
+    <div class="button-group" style="margin-top: 20px;">
+        <button class="option-button" onclick="showMyPage()">🔙 돌아가기</button>
+    </div>
+</div>
+
 
 <script src="script.js"></script>
 </body>
