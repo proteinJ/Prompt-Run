@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
             resourceLocation += "/";
         }
 
-        // 2. [수정] Windows 경로 안정화: "file:///" 접두사 사용
+        // 2. Windows 경로 안정화: "file:///" 접두사 사용
         // file:///C:/... 형태로 만들어 줍니다.
         // Spring Boot는 알아서 Windows 경로를 처리해주지만, 명시적으로 file:을 사용하는 것이 더 안전합니다.
         String mappingPath = "file:///" + resourceLocation;

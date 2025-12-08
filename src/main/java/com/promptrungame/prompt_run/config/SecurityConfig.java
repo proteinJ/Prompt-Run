@@ -57,10 +57,14 @@ public class SecurityConfig {
                 .formLogin(formLogin -> formLogin.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
 
+
                 // HTTP 요청 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 회원가입 및 모든 게임 API 경로를 인증 없이 허용 (Whitelist)
-                        .requestMatchers("/","/index.html","/style.css","/script.js","/image/**","/api/member/signup","/api/member/login", "/mainBG.jpg").permitAll()
+                        .requestMatchers("/","/index.html", "/admin.html", "/index.css", "admin-style.css", "/script.js", "admin-script.js","/image/**","/api/member/signup","/api/member/login", "/mainBG.jpg").permitAll()
+                        .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
+                        // 프리플라이트(OPTIONS) 요청 모두 허용
+//                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         // 나머지 모든 요청은 인증을 요구합니다.
                         .anyRequest().authenticated()
                 )
@@ -78,7 +82,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                // 🎯 필터 체인에서 완전히 제외: 403 Forbidden 오류 방지
+                // 필터 체인에서 완전히 제외: 403 Forbidden 오류 방지
                 .requestMatchers(
                         "/images/**",
                         "/favicon.ico",

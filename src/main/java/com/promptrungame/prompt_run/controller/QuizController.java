@@ -1,6 +1,6 @@
 package com.promptrungame.prompt_run.controller;
 
-import com.promptrungame.prompt_run.domain.Quiz;
+import com.promptrungame.prompt_run.dto.Quiz;
 import com.promptrungame.prompt_run.service.QuizService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +22,11 @@ public class QuizController {
 
     @GetMapping
     public ResponseEntity<Quiz> getQuiz(HttpSession session) {
-        Quiz quiz = quizService.getIssuedQuiz(session);
+        Quiz quizDto = quizService.issueNewQuiz(session);
 
-        if (quiz == null) {
+        if (quizDto == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(quiz);
+        return ResponseEntity.ok(quizDto);
     }
 }

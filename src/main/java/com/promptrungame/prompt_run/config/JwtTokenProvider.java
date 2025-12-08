@@ -8,13 +8,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -37,9 +37,20 @@ public class JwtTokenProvider {
     public String generateAccessToken(Member member) {
         Date accessTokenExpiresIn = generateAccessTokenExpiresIn(1);
 
+        // DB에서 가져온 role 값을 준비합니다. (예: "ADMIN")
+        String memberRole = member.getRole();
+
+        // 1. ROLE_ 접두사 처리 (DB에 'ADMIN'만 있을 경우 대비)
+        if (!memberRole.startsWith("ROLE_")) {
+            memberRole = "ROLE_" + memberRole;
+        }
+
+        String authorities = memberRole;
+
         return Jwts.builder()
                 .setSubject(String.valueOf(member.getId())) // 필수
                 .claim("username", member.getUsername()) // 사용자 정의: 이름
+                .claim("auth", authorities)
                 .setExpiration(accessTokenExpiresIn) // 필수
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -87,15 +98,25 @@ public class JwtTokenProvider {
         Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
 
         // 이 예시에서는 권한이 "ROLE_USER" 하나라고 가정합니다.
-        List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        String authoritiesString = claims.get("auth", String.class);
 
+        // 3. 권한 문자열을 SimpleGrantedAuthority 객체 리스트로 변환
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(authoritiesString.split(",")) // 쉼표로 분리
+                        .map(String::trim) // 공백 제거
+                        .filter(auth -> !auth.isEmpty()) // 빈 문자열 필터링
+                        .map(SimpleGrantedAuthority::new) // GrantedAuthority로 포장
+                        .collect(Collectors.toList());
+
+        // 4. UserDetails 객체 생성 (principal)
+        // Spring Security 컨텍스트에 사용자 정보(username)와 추출된 권한을 담습니다.
         org.springframework.security.core.userdetails.User principal = new org.springframework.security.core.userdetails.User(
-                claims.getSubject(), // 토큰의 Subject (여기서는 Member ID)를 Username으로 사용
-                "",                  // 토큰 기반 인증이므로 비밀번호는 비워둡니다.
-                authorities
+                claims.getSubject(),
+                "",          // 토큰 기반이므로 비밀번호는 비워둡니다.
+                authorities          // 토큰에서 추출한 권한 리스트 사용!
         );
 
-        // 인증 객체(Authentication) 반환
+        // 5. Authentication 객체 반환
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 

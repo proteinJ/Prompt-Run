@@ -3,10 +3,9 @@ let currentTurn = 0;
 let isWaitingForQuizAnswer = false;
 
 const MEMBERSHIP_PLANS = [
-    { name: 'BASIC', price: '무료' },
-    { name: 'PREMIUM', price: '10,000원' },
-    { name: 'GOLD', price: '25,000원' },
-    { name: 'PLATINUM', price: '50,000원' }
+    { name: 'Standard', price: '무료' },
+    { name: 'Basic', price: '5,000원' },
+    { name: 'PREMIUM', price: '10,000원' }
 ];
 
 // 메인/게임 화면 전환을 위한 요소 추가
@@ -129,7 +128,7 @@ function renderQuizInput(quizData) {
     const choicesContainer = document.createElement('div');
     choicesContainer.classList.add('options-container');
 
-    if (quizData.choices && quizData.choices.length > 0) {
+    if (quizData.choices && Array.isArray(quizData.choices)) {
         quizData.choices.forEach(choice => {
             const button = document.createElement('button');
             const answerKey = choice.trim().split('.')[0].trim();
@@ -140,6 +139,8 @@ function renderQuizInput(quizData) {
 
             choicesContainer.appendChild(button);
         });
+    } else {
+        console.error("선택지(choices) 데이터가 배열 형식이 아닙니다:", quizData.choices);
     }
     ui.inputArea.appendChild(choicesContainer);
 }
@@ -239,52 +240,79 @@ function showLogDetail(log) {
 }
 
 // 요금제
-// 요금제 변경 화면으로 이동
+// 요금제 변경 화면으로 이동 및 렌더링
 function showMembershipPage(currentMembership) {
-    // 1. 화면 전환 (다른 화면 다 꺼짐)
     showScreen('membership-screen');
 
     const container = document.getElementById('membership-list-container');
-    container.innerHTML = ''; // 초기화
+    container.innerHTML = '';
 
-    // 2. 요금제 목록 렌더링
+    // 각 플랜별 특징 정의 (화면에 보여줄 내용)
+    const planDetails = {
+        'BASIC': {
+            desc: 'AI의 능력을 체험해 보세요.',
+            features: ['간단한 설명 제공', '일반적인 질문 채팅', '제한적 메모리']
+        },
+        'PREMIUM': {
+            desc: '복잡한 작업을 위한 전체 경험.',
+            features: ['복잡한 문제 해결', '빠른 이미지 생성', '대화 기억력 향상', '우선 순위 지원']
+        },
+        'GOLD': {
+            desc: '전문가를 위한 생산성 극대화.',
+            features: ['고급 작업 및 토픽 마스터', '무제한 메시지', '최대 메모리 보존', '최우선 순위 지원']
+        },
+        'PLATINUM': { // 만약 있다면
+            desc: '기업 및 대규모 프로젝트용.',
+            features: ['모든 기능 무제한', '전담 매니저', 'API 접근 권한']
+        }
+    };
+
     MEMBERSHIP_PLANS.forEach(plan => {
         const isCurrent = plan.name === currentMembership;
+        const details = planDetails[plan.name] || { desc: '기본 플랜입니다.', features: ['기본 기능'] };
+
         const planCard = document.createElement('div');
-        planCard.classList.add('plan-card'); // CSS 스타일 필요
+        planCard.classList.add('plan-card');
+        if (isCurrent) planCard.classList.add('current');
 
-        // 스타일은 기존과 비슷하게 적용 (필요시 CSS 수정)
-        planCard.style.border = isCurrent ? '2px solid #4CAF50' : '1px solid #ddd';
-        planCard.style.padding = '15px';
-        planCard.style.margin = '10px 0';
-        planCard.style.borderRadius = '8px';
-        planCard.style.display = 'flex';
-        planCard.style.justifyContent = 'space-between';
-        planCard.style.alignItems = 'center';
-        planCard.style.background = isCurrent ? 'rgba(76, 175, 80, 0.1)' : 'transparent';
+        // 버튼 텍스트 및 클래스 결정
+        let buttonText, buttonClass;
+        if (isCurrent) {
+            buttonText = '현재 사용 중';
+            buttonClass = 'plan-button disabled';
+        } else {
+            buttonText = plan.name === 'PREMIUM' || plan.name === 'GOLD' ? '시작하기' : '변경하기';
+            // 중간 등급이나 상위 등급은 색상 강조
+            buttonClass = (plan.name === 'PREMIUM' || plan.name === 'GOLD') ? 'plan-button highlight' : 'plan-button action';
+        }
 
-        let buttonText = isCurrent ? '사용 중' : '변경하기 (Mock)';
-
+        // HTML 구조 생성 (이미지와 유사하게)
         planCard.innerHTML = `
             <div>
-                <strong style="font-size: 1.1rem;">${plan.name}</strong>
-                <span style="display:block; color: gray;">${plan.price}</span>
+                <div class="plan-name">${plan.name}</div>
+                <div class="plan-price-box">
+                    <h3 class="plan-price">${plan.price}</h3>
+                    <span class="plan-unit">/월</span>
+                </div>
+                <p class="plan-desc">${details.desc}</p>
+                
+                <ul class="plan-features">
+                    ${details.features.map(feat => `<li>${feat}</li>`).join('')}
+                </ul>
             </div>
+
+            <button class="${buttonClass}" 
+                ${isCurrent ? 'disabled' : ''}>
+                ${buttonText}
+            </button>
         `;
 
-        const btn = document.createElement('button');
-        btn.textContent = buttonText;
-        btn.className = 'option-button'; // 기존 버튼 스타일 활용
-        btn.style.marginLeft = '10px';
-
-        if (isCurrent) {
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-        } else {
+        // 버튼 이벤트 리스너 (disabled가 아닐 때만)
+        if (!isCurrent) {
+            const btn = planCard.querySelector('button');
             btn.onclick = () => updateMembershipMock(plan.name);
         }
 
-        planCard.appendChild(btn);
         container.appendChild(planCard);
     });
 }
@@ -408,8 +436,9 @@ async function sendMessage(message = "게임 시작. 시나리오를 시작해 �
         // 퀴즈 처리
         if (data.quizRequest) {
             isWaitingForQuizAnswer = true;
-            console.log("--- [DEBUG] 퀴즈 데이터 수신 ---", data.quizData);
-            renderQuizInput(data.quizData);
+            const quizPayload = data.quizEntityData || data.quizData;
+            console.log("--- [DEBUG] 퀴즈 데이터 수신 ---", quizPayload);
+            renderQuizInput(quizPayload);
             return;
         }
 

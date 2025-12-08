@@ -90,8 +90,9 @@ public class MemberService {
         }
     }
 
-
+    // ##############################
     // ######## (마이페이지) ##########
+    // ##############################
     // 사용자 정보 조회
     public MemberProfileResponse  getMemberProfile(Long memberId) {
         Member member = memberRepository.findById(memberId)
@@ -130,6 +131,8 @@ public class MemberService {
         String imageUrl = "/images/" + savedFilename; // 클라이언트가 접근할 가상 경로 (설정 필요)
 
         member.setProfileImageUrl(imageUrl); // Member 엔티티에 URL 업데이트
+
+        memberRepository.save(member);
 
         return imageUrl; // 클라이언트에게 성공적으로 저장된 URL 반환
     }

@@ -1,0 +1,196 @@
+/* src/main/resources/static/admin-style.css */
+
+/* === 기본 레이아웃 === */
+body {
+    background-color: #1e1e1e;
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    margin: 0;
+    height: 100vh;
+}
+
+/* === 사이드바 네비게이션 === */
+nav {
+    width: 220px;
+    background: #2d2d2d;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-title {
+    color: #4CAF50;
+    margin-bottom: 40px;
+    font-size: 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 20px;
+}
+
+.nav-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: none;
+    border: none;
+    color: #aaa;
+    text-align: left;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.2s;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.nav-btn:hover {
+    background-color: #3a3a3a;
+    color: #fff;
+}
+
+.nav-btn.active {
+    color: #fff;
+    background: #444;
+    font-weight: bold;
+    border-left: 4px solid #4CAF50;
+}
+
+.back-btn {
+    margin-top: auto; /* 맨 아래로 배치 */
+    color: #f44336;
+}
+
+.back-btn:hover {
+    background-color: rgba(244, 67, 54, 0.1);
+    color: #ff7961;
+}
+
+/* === 메인 컨텐츠 영역 === */
+main {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto; /* 내용 많을 때 스크롤 */
+}
+
+.section {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.section.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+/* === 카드 및 폼 스타일 === */
+.card {
+    background: #2d2d2d;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    margin-bottom: 20px;
+}
+
+.small-card {
+    max-width: 400px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #fff;
+    box-sizing: border-box; /* 패딩 포함 크기 계산 */
+}
+
+input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+/* === 버튼 스타일 === */
+.action-btn {
+    padding: 10px 20px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.action-btn:hover {
+    background-color: #45a049;
+}
+
+.delete-btn {
+    background: #d32f2f;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.delete-btn:hover {
+    background-color: #b71c1c;
+}
+
+/* === 테이블 스타일 === */
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #444;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #2d2d2d;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid #444;
+    text-align: left;
+}
+
+th {
+    background: #333;
+    font-weight: 600;
+    color: #ddd;
+}
+
+tr:hover {
+    background-color: #383838;
+}
+
+/* === 텍스트 유틸리티 === */
+.info-text {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+}
+
+.highlight-text {
+    color: #4CAF50;
+    font-weight: bold;
+    font-size: 1.1rem;
+}

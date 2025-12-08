@@ -1,8 +1,5 @@
 package com.promptrungame.prompt_run.dto;
 
-import com.google.genai.Chat;
-import com.google.genai.types.FunctionDeclaration;
-import com.promptrungame.prompt_run.domain.Quiz;
 import lombok.*;
 
 @Getter
@@ -21,7 +18,7 @@ public class ChatResponse {
     private boolean isQuizRequest;
 
     // 퀴즈 Data
-    private Quiz quizData;
+    private Quiz quizEntityData;
 
     // 게임 종료 여부
     private  boolean isGameEnded;

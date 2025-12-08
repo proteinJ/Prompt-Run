@@ -1,5 +1,5 @@
 /* =====================================
-// style.css (Toss Style Redesign)
+// index.css (Toss Style Redesign)
 // ===================================== */
 
 /* Pretendard 폰트 (CDN) */
@@ -333,6 +333,7 @@ button {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 반응형 그리드 */
     gap: 12px;
     margin-top: 10px;
+    margin-bottom: 30px;
 }
 
 .option-button {
@@ -345,6 +346,7 @@ button {
     text-align: center;
     transition: all 0.2s;
     border: 1px solid transparent;
+    width: 130px;
 }
 
 .option-button:hover:not(:disabled) {
@@ -576,7 +578,7 @@ button {
 }
 
 /* 이미지 변경 버튼 스타일 */
-.upload-label {
+.upload-label, .change-membership-btn {
     display: inline-block;
     padding: 8px 12px;
     background-color: var(--button-secondary-bg);
@@ -587,7 +589,7 @@ button {
     transition: background-color 0.2s;
 }
 
-.upload-label:hover {
+.upload-label:hover, .change-membership-btn {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
@@ -600,99 +602,185 @@ button {
 }
 
 /* =====================================
-// 요금제 관리 섹션 스타일
+// 요금제 관리 섹션 스타일 (수정됨)
 // ===================================== */
-/* === 요금제 변경 화면 스타일 === */
 
-/* 화면 중앙 정렬 */
+/* 화면 중앙 정렬 및 배경 */
 #membership-screen {
+    display: flex; /* flex로 변경하여 내부 정렬 */
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    padding: 40px;
+    width: 100%;
+    /* max-width를 늘려서 3개 카드가 넉넉히 들어가게 함 */
+    max-width: 1000px;
+    margin: 0 auto; /* 중앙 정렬 */
+    background: #191F28;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 60px 40px; /* 내부 여백 확보 */
+    border-radius: 24px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
 }
 
 #membership-screen h2 {
     color: #fff;
     margin-bottom: 10px;
-    font-size: 2rem;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    font-size: 2.2rem;
+    text-align: center;
 }
 
 #membership-screen p {
     color: #aaa;
-    margin-bottom: 30px;
+    margin-bottom: 50px;
+    text-align: center;
 }
 
-/* 카드 리스트 컨테이너 */
+/* 카드 리스트 컨테이너 (가로 배치) */
 #membership-list-container {
     display: flex;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 20px;
     width: 100%;
-    max-width: 500px; /* 너무 넓어지지 않게 제한 */
+    justify-content: center;
+    align-items: stretch; /* 카드 높이 통일 */
+    flex-wrap: wrap; /* 화면 작으면 줄바꿈 */
 }
 
 /* 개별 요금제 카드 */
 .plan-card {
-    background-color: rgba(255, 255, 255, 0.05); /* 투명한 어두운 배경 */
+    background-color: #222; /* 카드 배경 */
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 30px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: transform 0.2s, background-color 0.2s;
+    flex-direction: column; /* 내부 요소 세로 정렬 */
+    justify-content: space-between; /* 위아래 분산 */
+    flex: 1; /* 너비 균등 분배 */
+    min-width: 100px;
+    max-width: 230px;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
 }
 
+/* 호버 효과 */
 .plan-card:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px); /* 살짝 떠오르는 효과 */
+    border-color: #4CAF50;
+    transform: translateY(-5px);
+    background-color: #2a2a2a;
 }
 
-/* 현재 사용 중인 요금제 강조 */
-.plan-card strong {
+/* 현재 사용 중인 카드 강조 */
+.plan-card.current {
+    border: 2px solid #4CAF50;
+    background-color: rgba(76, 175, 80, 0.05);
+}
+
+/* --- 카드 내부 타이포그래피 --- */
+
+/* 요금제 이름 (Free, Plus 등) */
+.plan-name {
+    font-size: 1.2rem;
+    font-weight: 600;
     color: #fff;
-    display: block;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
 }
 
-.plan-card span {
-    font-size: 0.9rem;
+/* 가격 영역 */
+.plan-price-box {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.plan-price {
+    font-size: 2.5rem; /* 가격 크게 */
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+}
+
+.plan-unit {
+    font-size: 1rem;
+    color: #888;
+}
+
+/* 설명 텍스트 */
+.plan-desc {
+    color: #aaa;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+    min-height: 40px; /* 설명 길이 달라도 버튼 위치 맞추기 */
+}
+
+/* 기능 목록 */
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+    text-align: left;
+}
+
+.plan-features li {
     color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* 버튼 스타일 (기존 option-button과 조화) */
-.plan-card button {
-    padding: 8px 16px;
-    border-radius: 6px;
+/* 체크 아이콘 흉내 */
+.plan-features li::before {
+    content: '✔';
+    color: #4CAF50;
+    font-size: 0.8rem;
+}
+
+/* 버튼 스타일 (꽉 차게) */
+.plan-button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
     border: none;
+    font-size: 1rem;
+    font-weight: 700;
     cursor: pointer;
-    font-weight: bold;
     transition: 0.2s;
+    margin-top: auto; /* 맨 아래로 밀기 */
 }
 
-/* 변경하기 버튼 */
-.plan-card button:not([disabled]) {
-    background-color: #4CAF50;
-    color: white;
+/* 변경하기 버튼 (기본) */
+.plan-button.action {
+    background-color: #fff;
+    color: #000;
 }
-.plan-card button:not([disabled]):hover {
+.plan-button.action:hover {
+    background-color: #e0e0e0;
+}
+
+/* 추천/강조 버튼 (녹색) */
+.plan-button.highlight {
+    background-color: #4CAF50;
+    color: #fff;
+}
+.plan-button.highlight:hover {
     background-color: #45a049;
 }
 
 /* 사용 중 버튼 (비활성화) */
-.plan-card button[disabled] {
-    background-color: #555;
-    color: #aaa;
+.plan-button.disabled {
+    background-color: #444;
+    color: #888;
     cursor: default;
 }
 
-/* 돌아가기 버튼 위치 잡기 */
+/* 돌아가기 버튼 위치 */
 #membership-screen .button-group {
     width: 100%;
-    max-width: 500px;
     display: flex;
     justify-content: center;
+    margin-top: 40px;
 }
