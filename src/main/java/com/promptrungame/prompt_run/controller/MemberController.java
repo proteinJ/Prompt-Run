@@ -142,10 +142,8 @@ public class MemberController {
 
         try {
             String username = userDetails.getUsername();
-            Member member = memberRepository.findByUsername(username)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-            memberService.updateMembership(member.getId(), request.getNewMembership());
+            memberService.updateMembership(Long.parseLong(username), request.getNewMembership());
 
             return ResponseEntity.ok("멤버십 등급이 성공적으로 변경되었습니다: " + request.getNewMembership());
 

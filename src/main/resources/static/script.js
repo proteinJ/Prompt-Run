@@ -3,8 +3,8 @@ let currentTurn = 0;
 let isWaitingForQuizAnswer = false;
 
 const MEMBERSHIP_PLANS = [
-    { name: 'Standard', price: '무료' },
-    { name: 'Basic', price: '5,000원' },
+    { name: 'STANDARD', price: '무료' },
+    { name: 'BASIC', price: '5,000원' },
     { name: 'PREMIUM', price: '10,000원' }
 ];
 
@@ -247,23 +247,21 @@ function showMembershipPage(currentMembership) {
     const container = document.getElementById('membership-list-container');
     container.innerHTML = '';
 
+    console.log("받아온 내 멤버십 등급:", currentMembership);
+
     // 각 플랜별 특징 정의 (화면에 보여줄 내용)
     const planDetails = {
+        'STANDARD': {
+            desc: '마이클 - 기본 캐릭터',
+            features: ['HP:100', 'ARMOR:10']
+        },
         'BASIC': {
-            desc: 'AI의 능력을 체험해 보세요.',
-            features: ['간단한 설명 제공', '일반적인 질문 채팅', '제한적 메모리']
+            desc: '프랭클린 - 숙련된 캐릭터',
+            features: ['HP:100', 'ARMOR:50', '퀴즈 힌트 3개']
         },
         'PREMIUM': {
-            desc: '복잡한 작업을 위한 전체 경험.',
-            features: ['복잡한 문제 해결', '빠른 이미지 생성', '대화 기억력 향상', '우선 순위 지원']
-        },
-        'GOLD': {
-            desc: '전문가를 위한 생산성 극대화.',
-            features: ['고급 작업 및 토픽 마스터', '무제한 메시지', '최대 메모리 보존', '최우선 순위 지원']
-        },
-        'PLATINUM': { // 만약 있다면
-            desc: '기업 및 대규모 프로젝트용.',
-            features: ['모든 기능 무제한', '전담 매니저', 'API 접근 권한']
+            desc: '트레버 - 고인물 캐릭터',
+            features: ['HP:100', 'ARMOR:100', '퀴즈 힌트 7개']
         }
     };
 
@@ -426,7 +424,14 @@ async function sendMessage(message = "게임 시작. 시나리오를 시작해 �
             return;
         }
 
-        addMessageToFeed(data.response, 'model');
+        // [OPTIONS: ...] 제거
+        let displayResponseText = data.response;
+        const optionsMatch = displayResponseText.match(/\[OPTIONS:\s*([\s\S]*?)\]/);
+        if (optionsMatch) {
+            displayResponseText = displayResponseText.replace(/\[OPTIONS:\s*([\s\S]*?)\]/, '').trim();
+        }
+
+        addMessageToFeed(displayResponseText, 'model');
 
         if (!data.gameEnded && !data.quizRequest) {
             currentTurn++;
@@ -447,10 +452,12 @@ async function sendMessage(message = "게임 시작. 시나리오를 시작해 �
 
             let resultMessage = "✅ 게임 종료!"; // [RESULT: ] 태그가 없을 경우의 기본 메시지
 
-            if (resultMatch) {
-                // 태그 내용이 있다면 해당 내용을 최종 결과 메시지로 사용
-                resultMessage = resultMatch[1].trim();
-            }
+//            if (resultMatch) {
+//                // 태그 내용이 있다면 해당 내용을 최종 결과 메시지로 사용
+//                resultMessage = resultMatch[1].trim();
+//                if (resultMessage === "TIMEOUT")
+//            }
+
 
             // 최종 결과 메시지를 피드에 추가
             addMessageToFeed(resultMessage, 'system');

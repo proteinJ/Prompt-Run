@@ -140,10 +140,11 @@ public class MemberService {
     // 사용자 요금제(Membership) 변경
     @Transactional
     public void updateMembership(Long memberId, String newMembership) {
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        // 1. [선택적] 멤버십 등급의 유효성 검사 로직 추가 예정
+        // 1. 멤버십 등급의 유효성 검사 로직 추가 예정
 
         if (newMembership == null || newMembership.trim().isEmpty()) {
             throw new IllegalArgumentException("새 멤버십 등급을 지정해야 합니다.");
